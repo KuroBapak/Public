@@ -61,7 +61,7 @@ function reverseString($aldo) {
 }
 
 // Hapus komentar di bawah ini untuk jalankan Code
-reverseString("abduh");
+reverseString("abdul");
 reverseString("Bootcamp");
 reverseString("We Are JCC Developers");
 
