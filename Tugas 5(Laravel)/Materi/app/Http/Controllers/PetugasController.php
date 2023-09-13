@@ -13,7 +13,7 @@ class PetugasController extends Controller
         //dd($buku);
     }
 
-    public function storep(Request $tb_petugas){
+    public function storePetugas(Request $tb_petugas){
         //dd($tb_buku->except(['_token','submit']));
         Petugas::create($tb_petugas->except(['_token','submit']));
     }

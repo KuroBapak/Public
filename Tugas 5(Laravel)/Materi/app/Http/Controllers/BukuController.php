@@ -13,7 +13,7 @@ class BukuController extends Controller
         //dd($buku);
     }
 
-    public function storeb(Request $tb_buku){
+    public function storeBuku(Request $tb_buku){
         //dd($tb_buku->except(['_token','submit']));
         Buku::create($tb_buku->except(['_token','submit']));
     }

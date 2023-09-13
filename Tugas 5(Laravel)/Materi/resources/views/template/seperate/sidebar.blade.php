@@ -56,9 +56,27 @@
                 </a>
               </li>
               <li class="nav-item">
+                <a href="{{ asset('peminjaman')}}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Peminjaman</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{{ asset('pengembalian')}}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>pengembalian</p>
+                </a>
+              </li>
+              <li class="nav-item">
                 <a href="{{ asset('petugas')}}" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>
                   <p>Petugas</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{{ asset('rak')}}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Rak</p>
                 </a>
               </li>
             </ul>
