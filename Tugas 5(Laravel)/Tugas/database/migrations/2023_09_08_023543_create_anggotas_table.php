@@ -11,15 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('anggota', function (Blueprint $table) {
+        Schema::create('anggotas', function (Blueprint $table) {
             $table->id();
-            $table->char('kode_anggota', 9);
+            $table->string('kode_anggota', 9);
             $table->string('nama_anggota', 100);
             $table->char('jk_anggota', 1);
-            $table->char('jurusan_anggota', 2);
-            $table->char('no_telp_anggota', 13);
+            $table->string('jurusan_anggota', 10);
+            $table->string('no_telp_anggota', 13);
             $table->string('alamat_anggota', 100);
             $table->timestamps();
+
         });
     }
 

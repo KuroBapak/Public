@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Profile;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -23,19 +24,32 @@ class AuthController extends Controller
     }
 
     //store register
-    public function store(Request $request, User $user, Auth $auth)
+    public function store(Request $request, User $user, Auth $auth, Profile $profile)
     {
         $request->validate([
             'name' => 'required|string|max:250',
             'email' => 'required|email|max:250|unique:users,email',
-            'password' => 'required|max:8'
+            'password' => 'required|max:8',
+            'umur' => 'required',
+            'bio' => 'required|min:10',
+            'alamat' => 'required|min:10',
         ]);
 
-        User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password)
-        ]);
+        // User::create([
+        //     'name' => $request->name,
+        //     'email' => $request->email,
+        //     'password' => Hash::make($request->password)
+        // ]);
+        $user->name = $request->name;
+        $user->email = $request->email;
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        $profile->bio  = $request->bio;
+        $profile->alamat  = $request->alamat;
+        $profile->umur  = $request->umur;
+        $profile->user_id  = $user->id;
+        $profile->save();
 
         $credential = $request->only('email','password');
         $auth::attempt($credential);

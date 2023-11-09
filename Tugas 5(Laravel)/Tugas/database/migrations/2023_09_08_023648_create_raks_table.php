@@ -15,9 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('nama_rak', 50);
             $table->string('lokasi_rak', 50);
-            $table->unsignedBigInteger('id_buku');
-            $table->foreign('id_buku')->references('id')->on('bukus');
-            // $table->foreignId('id_buku')->constrained('bukus');
+            $table->foreignId('id_buku')->constrained('bukus');
             $table->timestamps();
         });
     }

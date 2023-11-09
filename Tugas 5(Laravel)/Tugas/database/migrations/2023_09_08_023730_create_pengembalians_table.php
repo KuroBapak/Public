@@ -11,16 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('pengembalian', function (Blueprint $table) {
+        Schema::create('pengembalians', function (Blueprint $table) {
             $table->id();
             $table->date('tanggal_pengembalian');
             $table->integer('denda');
-            $table->unsignedBigInteger('id_buku');
-            $table->foreign('id_buku')->references('id')->on('anggotas');
-            $table->unsignedBigInteger('id_anggota');
-            $table->foreign('id_anggota')->references('id')->on('anggotas');
-            $table->unsignedBigInteger('id_petugas');
-            $table->foreign('id_petugas')->references('id')->on('petugass');
+            $table->foreignId('id_buku')->constrained('bukus');
+            $table->foreignId('id_anggota')->constrained('anggotas');
+            $table->foreignId('id_petugas')->constrained('petugas');
             $table->timestamps();
         });
     }

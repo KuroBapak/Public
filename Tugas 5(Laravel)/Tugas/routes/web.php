@@ -31,8 +31,6 @@ Route::get('/form', function () {
     return view('form')->name('form');
 });
 */
-Route::get('/master', [MasterController::class, 'master'])->name('master');
-Route::get('/', [MasterController::class, 'content'])->name('index')->middleware('auth');
 
 Route::controller(AuthController::class)->group(function() {
     Route::get('/registration', 'register')->name('auth.register');
@@ -42,7 +40,10 @@ Route::controller(AuthController::class)->group(function() {
     Route::post('/logout', 'logout')->name('auth.logout');
 });
 
+Route::get('/profile/{user}', [ProfilesController::class, 'show'])->name('user.profile')->middleware('auth');
 
+Route::get('/master', [MasterController::class, 'master'])->name('master');
+Route::get('/', [MasterController::class, 'content'])->name('index')->middleware('auth');
 Route::resource('/anggota', AnggotaController::class)->middleware('auth');
 Route::resource('/buku', BukuController::class)->middleware('auth');
 Route::resource('/peminjaman', PeminjamanController::class)->middleware('auth');

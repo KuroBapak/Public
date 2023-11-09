@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Buku;
+use App\Models\Rak;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -12,8 +14,9 @@ class BukuController extends Controller
      */
     public function index()
     {
-        $buku = DB::table('buku')->get();
-        return view('buku.index', compact('buku'));
+        //
+        $bukus = Buku::all();
+        return view('buku.index', compact('bukus'));
     }
 
     /**
@@ -21,6 +24,7 @@ class BukuController extends Controller
      */
     public function create()
     {
+        //
         return view('buku.create');
     }
 
@@ -29,32 +33,48 @@ class BukuController extends Controller
      */
     public function store(Request $request)
     {
+        //
         $request->validate([
-            'kode_buku' => 'required|numeric',
-            'judul_buku' => 'required',
-            'penulis_buku' => 'required',
-            'penerbit_buku' => 'required',
-            'tahun_penerbit' => 'required|numeric',
-            'stok' => 'required|numeric'
+            'kode' => 'required||unique:bukus,kode_buku|min:3',
+            'judul' => 'required|min:5',
+            'penulis' => 'required|min:5',
+            'penerbit' => 'required|min:5',
+            'tahun' => 'required',
+            'stok' => 'required',
+        ],[
+            'kode.required' => 'kode wajib diisi, tidak boleh kosong ya cuy',
+            'kode.unique' => 'Kode sudah terdaftar, silahkan coba dengan kode lain',
+            'kode.min' => 'kode minimal 3 angka',
+            'judul.required' => 'judul wajib diisi, tidak boleh kosong ya cuy',
+            'judul.min' => 'judul minimal 5 huruf',
+            'penulis.required' => 'penulis wajib diisi, tidak boleh kosong ya cuy',
+            'penulis.min' => 'penulis minimal 5 huruf',
+            'penerbit.required' => 'penerbit wajib diisi, tidak boleh kosong ya cuy',
+            'penerbit.min' => 'penerbit minimal 5 huruf',
+            'tahun.required' => 'tahun wajib diisi, tidak boleh kosong ya cuy',
+            'stok.required' => 'stok wajib diisi, tidak boleh kosong ya cuy',
+
+        ]);
+        $query = DB::table('bukus')->insert([
+            'kode_buku' => $request['kode'],
+            'judul_buku' => $request['judul'],
+            'penulis_buku' => $request['penulis'],
+            'penerbit_buku' => $request['penerbit'],
+            'tahun_penerbit' => $request['tahun'],
+            'stok' => $request['stok'],
         ]);
 
-        $query = DB::table('buku')->insert([
-            'kode_buku' => $request['kode_buku'],
-            'judul_buku' => $request['judul_buku'],
-            'penulis_buku' => $request['penulis_buku'],
-            'penerbit_buku' => $request['penerbit_buku'],
-            'tahun_penerbit' => $request['tahun_penerbit'],
-            'stok' => $request['stok']
-        ]);
         return redirect()->route('buku.index');
+
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Buku $bukus, $id)
     {
-        $bukus = DB::table('buku')->where('id_buku', $id)->get();
+        //
+        $bukus = Buku::findOrFail($id);
         return view('buku.show', compact('bukus'));
     }
 
@@ -63,7 +83,8 @@ class BukuController extends Controller
      */
     public function edit(string $id)
     {
-        $bukus = DB::table('buku')->where('id_buku', $id)->get();
+        //
+        $bukus = Buku::find($id);
         return view('buku.edit', compact('bukus'));
     }
 
@@ -72,22 +93,34 @@ class BukuController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        //
         $request->validate([
-            'kode_buku' => 'required|numeric',
-            'judul_buku' => 'required',
-            'penulis_buku' => 'required',
-            'penerbit_buku' => 'required',
-            'tahun_penerbit' => 'required|numeric',
-            'stok' => 'required|numeric'
-        ]);
+            'kode' => 'required||min:3',
+            'judul' => 'required|min:5',
+            'penulis' => 'required|min:5',
+            'penerbit' => 'required|min:5',
+            'tahun' => 'required',
+            'stok' => 'required',
+        ],[
+            'kode.required' => 'kode wajib diisi, tidak boleh kosong ya cuy',
+            'kode.min' => 'kode minimal 3 angka',
+            'judul.required' => 'judul wajib diisi, tidak boleh kosong ya cuy',
+            'judul.min' => 'judul minimal 5 huruf',
+            'penulis.required' => 'penulis wajib diisi, tidak boleh kosong ya cuy',
+            'penulis.min' => 'penulis minimal 5 huruf',
+            'penerbit.required' => 'penerbit wajib diisi, tidak boleh kosong ya cuy',
+            'penerbit.min' => 'penerbit minimal 5 huruf',
+            'tahun.required' => 'tahun wajib diisi, tidak boleh kosong ya cuy',
+            'stok.required' => 'stok wajib diisi, tidak boleh kosong ya cuy',
 
-        $query = DB::table('buku')->where('id_buku',$id)->update([
-            'kode_buku' => $request['kode_buku'],
-            'judul_buku' => $request['judul_buku'],
-            'penulis_buku' => $request['penulis_buku'],
-            'penerbit_buku' => $request['penerbit_buku'],
-            'tahun_penerbit' => $request['tahun_penerbit'],
-            'stok' => $request['stok']
+        ]);
+        $query = DB::table('bukus')->where('id', $id)->update([
+            'kode_buku' => $request['kode'],
+            'judul_buku' => $request['judul'],
+            'penulis_buku' => $request['penulis'],
+            'penerbit_buku' => $request['penerbit'],
+            'tahun_penerbit' => $request['tahun'],
+            'stok' => $request['stok'],
         ]);
         return redirect()->route('buku.index');
     }
@@ -97,7 +130,8 @@ class BukuController extends Controller
      */
     public function destroy(string $id)
     {
-        $query = DB::table('buku')->where('id_buku',$id)->delete();
+        //
+        $bukus = DB::table('bukus')->where('id', $id)->delete();
         return redirect()->route('buku.index');
     }
 }

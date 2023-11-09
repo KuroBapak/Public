@@ -6,7 +6,6 @@ use App\Http\Controllers\AuthorController;
 use App\Http\Controllers\CastController;
 use App\Http\Controllers\FilmController;
 use App\Http\Controllers\GenreController;
-
 use App\Http\Controllers\ImageController;
 use App\Http\Controllers\KritikController;
 use App\Http\Controllers\PeranController;
@@ -49,11 +48,11 @@ Route::controller(AuthController::class)->group(function() {
     Route::post('/logout', 'logout')->name('auth.logout');
 });
 
-Route::get('/', [AuthorController::class, 'index']);
+Route::get('/index', [AuthorController::class, 'index']);
 Route::get('/form', [AuthorController::class, 'form'])->name('form');
 Route::get('/welcome', [AuthorController::class, 'welcome'])->name('welcome');
 
-Route::get('/index', function() {
+Route::get('/', function() {
     return view('template.master');
 });
 

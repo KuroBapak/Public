@@ -69,6 +69,45 @@
         @error('confirm')
         <div class="alert alert-danger">{{ $message }}</div>
         @enderror
+        <form action="{{ route('auth.store')}}" method="post">
+          @csrf
+          <div class="input-group mb-3">
+            <input type="text" class="form-control" placeholder="Umur" name="umur">
+            <div class="input-group-append">
+              <div class="input-group-text">
+                <span class="fas fa-user"></span>
+              </div>
+            </div>
+          </div>
+          @error('umur')
+                    <div class="alert alert-danger">{{ $message }}</div>
+          @enderror
+          <form action="{{ route('auth.store')}}" method="post">
+            @csrf
+            <div class="input-group mb-3">
+              <input type="text" class="form-control" placeholder="Alamat" name="alamat">
+              <div class="input-group-append">
+                <div class="input-group-text">
+                  <span class="fas fa-user"></span>
+                </div>
+              </div>
+            </div>
+            @error('alamat')
+                      <div class="alert alert-danger">{{ $message }}</div>
+            @enderror
+            <form action="{{ route('auth.store')}}" method="post">
+              @csrf
+              <div class="input-group mb-3">
+                <input type="text" class="form-control" placeholder="Bio" name="bio">
+                <div class="input-group-append">
+                  <div class="input-group-text">
+                    <span class="fas fa-user"></span>
+                  </div>
+                </div>
+              </div>
+              @error('bio')
+                        <div class="alert alert-danger">{{ $message }}</div>
+              @enderror
         <div class="row">
           <div class="col">
             <button type="submit" class="btn btn-primary btn-block">Create Account</button>
@@ -76,6 +115,7 @@
         </div>
       </form><br>
       <a href="{{ asset('login')}}" class="text-center">I already have a membership</a>
+      
     </div>
     <!-- /.form-box -->
   </div><!-- /.card -->

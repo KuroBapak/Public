@@ -25,9 +25,7 @@
   @include('template.seperate.sidebar')
 
   <!-- Content Wrapper. Contains page content -->
-  <div class="content-wrapper">
 @yield('content')
-  </div>
   <!-- /.content-wrapper -->
 <!-- footer -->
 @include('template.seperate.footer')

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Petugas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -12,8 +13,9 @@ class PetugasController extends Controller
      */
     public function index()
     {
-        $petugas = DB::table('petugas')->get();
-        return view('petugas.index', compact('petugas'));
+        //
+        $petugass = Db::table('petugas')->get();
+        return view('petugas.index', compact('petugass'));
     }
 
     /**
@@ -30,18 +32,28 @@ class PetugasController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nama_petugas' => 'required',
-            'jabatan_petugas' => 'required',
-            'no_telp_petugas' => 'required|numeric',
-            'alamat_petugas' => 'required'
+            'nama' => 'required',
+            'jabatan' => 'required',
+            'telp' => 'required|numeric|min:10',
+            'alamat' => 'required|min:10',
+        ],[
+            'nama.required' => 'nama wajib diisi, tidak boleh kosong ya cuy',
+            'jabatan.required' => 'jabatan wajib diisi, tidak boleh kosong ya cuy',
+            'telp.required' => 'telp wajib diisi, tidak boleh kosong ya cuy',
+            'telp.numeric' => 'telp harus berupa angka',
+            'telp.min' => 'telp minimal 10 angka',
+            'alamat.required' => 'alamat wajib diisi, tidak boleh kosong ya cuy',
+            'alamat.min' => 'alamat minimal 10 angka',
+
         ]);
 
         $query = DB::table('petugas')->insert([
-            'nama_petugas' => $request['nama_petugas'],
-            'jabatan_petugas' => $request['jabatan_petugas'],
-            'no_telp_petugas' => $request['no_telp_petugas'],
-            'alamat_petugas' => $request['alamat_petugas']
+            'nama_petugas' => $request['nama'],
+            'jabatan_petugas' => $request['jabatan'],
+            'no_telp_petugas' => $request['telp'],
+            'alamat_petugas' => $request['alamat'],
         ]);
+
         return redirect()->route('petugas.index');
     }
 
@@ -50,7 +62,8 @@ class PetugasController extends Controller
      */
     public function show(string $id)
     {
-        $petugass = DB::table('petugas')->where('id_petugas', $id)->get();
+        //
+        $petugass = DB::table('petugas')->where('id', $id)->get();
         return view('petugas.show', compact('petugass'));
     }
 
@@ -59,7 +72,8 @@ class PetugasController extends Controller
      */
     public function edit(string $id)
     {
-        $petugass = DB::table('petugas')->where('id_petugas', $id)->get();
+        //
+        $petugass = DB::table('petugas')->where('id', $id)->get();
         return view('petugas.edit', compact('petugass'));
     }
 
@@ -68,18 +82,19 @@ class PetugasController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        //
         $request->validate([
-            'nama_petugas' => 'required',
-            'jabatan_petugas' => 'required',
-            'no_telp_petugas' => 'required|numeric',
-            'alamat_petugas' => 'required'
+            'nama' => 'required',
+            'jabatan' => 'required',
+            'telp' => 'required|numeric|min:10',
+            'alamat' => 'required|min:10',
         ]);
 
-        $query = DB::table('petugas')->where('id_petugas',$id)->update([
-            'nama_petugas' => $request['nama_petugas'],
-            'jabatan_petugas' => $request['jabatan_petugas'],
-            'no_telp_petugas' => $request['no_telp_petugas'],
-            'alamat_petugas' => $request['alamat_petugas']
+        $query = DB::table('petugas')->where('id', $id)->update([
+            'nama_petugas' => $request['nama'],
+            'jabatan_petugas' => $request['jabatan'],
+            'no_telp_petugas' => $request['telp'],
+            'alamat_petugas' => $request['alamat'],
         ]);
         return redirect()->route('petugas.index');
     }
@@ -89,7 +104,8 @@ class PetugasController extends Controller
      */
     public function destroy(string $id)
     {
-        $query = DB::table('petugas')->where('id_petugas',$id)->delete();
+        //
+        $petugass = DB::table('petugas')->where('id', $id)->delete();
         return redirect()->route('petugas.index');
     }
 }
