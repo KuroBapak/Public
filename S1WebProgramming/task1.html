@@ -1,0 +1,60 @@
+<head>
+    <style>
+    div {
+    margin: 100px 100px;
+    height: 100px;
+    width: 100px;
+    border: 1px solid transparent;
+    transition: 1s linear;
+    background-color: red;
+    animation: example 1s infinite linear;
+    border-radius: 30%;
+    }
+    h1 {
+    animation: text 1s infinite linear;
+    }
+    @keyframes text {
+    0% {
+    background-image: radial-gradient(red, orange, yellow);
+    }
+    25% {
+    background-image: radial-gradient(lime, greenyellow, green);
+    }
+    50% {
+    background-image: radial-gradient(teal, turquoise, skyblue);
+    }
+    75% {
+    background-image: radial-gradient(royalblue, blue, mediumblue);
+    }
+    100% {
+    background-image: radial-gradient(red, orange, yellow);
+    }
+    }
+    @keyframes example {
+    0% {
+    background-image: radial-gradient(red, orange, yellow);
+    transform: rotate(0deg) scale(0.5);
+    }
+    25% {
+    background-image: radial-gradient(lime, greenyellow, green);
+    transform: rotate(90deg) scale(1);
+    }
+    50% {
+    background-image: radial-gradient(teal, turquoise, skyblue);
+    transform: rotate(180deg) scale(1.5);
+    }
+    75% {
+    background-image: radial-gradient(royalblue, blue, mediumblue);
+    transform: rotate(270deg) scale(1);
+    }
+    100% {
+    background-image: radial-gradient(red, orange, yellow);
+    transform: rotate(360deg) scale(0.5);
+    }
+    }
+    </style>
+    </head>
+    <body>
+    <h1><marquee>party party laaaaaaa</marquee></h1>
+    <div></div>
+    </body>
