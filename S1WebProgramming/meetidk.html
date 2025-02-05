@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manipulate Attributes</title>
+</head>
+<body>
+  <h1 id="heading" style="color: blue;">This is a Heading 1</h1>
+  <p id="demo"></p>
+  <button onclick="getAttVal()">Get Attribute</button>
+  <button onclick="changeToOrange()">Change to Orange</button>
+  <button onclick="changeToItalic()">Change Font to Italic</button>
+
+  <script>
+    function getAttVal() {
+      // Get the heading element
+      let node = document.getElementById("heading");
+      // Get the style attribute
+      let nodeAtt = node.getAttribute("style");
+      // Display the style attribute in the paragraph
+      document.getElementById("demo").innerHTML = "Current style: " + nodeAtt;
+    }
+
+    function changeToOrange() {
+      // Get the heading element
+      let node = document.getElementById("heading");
+      // Set the style attribute to change color to orange
+      node.setAttribute("style", "color: orange;");
+    }
+
+    function changeToItalic() {
+      // Get the heading element
+      let node = document.getElementById("heading");
+      // Add or modify the style attribute to change font style to italic
+      node.setAttribute("style", "color: blue; font-style: italic;");
+    }
+  </script>
+</body>
+</html>

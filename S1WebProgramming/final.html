@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS Hidden Number</title>
+</head>
+<body>
+    <script>
+        
+const hiddenNumber = 20;
+
+let attempts = 0;
+let userGuess;
+
+do {
+    userGuess = parseInt(prompt("Guess the number:"), 10);
+    attempts++; 
+
+    if (userGuess === -1) {
+        alert(`${attempts}`);
+        break;
+    } else if (userGuess !== hiddenNumber) {
+        alert("Wrong, please try again.");
+    }
+} while (userGuess !== hiddenNumber);
+
+if (userGuess === hiddenNumber) {
+    alert(`You guessed the correct number in ${attempts} attempt's.`);
+}
+
+    </script>
+</body>
+</html>
