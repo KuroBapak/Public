@@ -1,5 +1,5 @@
-.venv_cnn/
-.venv_mlp/
+.venv_cnn/*
+.venv_mlp/*
 dataset_videos/*
 asl_alphabet/*
 ASL Handsign DeepLearning.rar
