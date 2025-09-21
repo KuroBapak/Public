@@ -1,0 +1,10 @@
+.venv_cnn/
+.venv_mlp/
+dataset_videos/*
+asl_alphabet/*
+ASL Handsign DeepLearning.rar
+ASL Handsign DeepLearning/outputs/features/*.npy
+ASL Handsign DeepLearning/ASL Handsign DeepLearning.rar
+outputs/*
+outputs/features*
+outputs/models*
