@@ -74,13 +74,13 @@ Consist of datasets of ASL handsign datas from kaggle.
 These videos are taken from collect_videos.py later preprocessed for LSTM training.
 
 Runable
-Remove-Item -Recurse -Force .venv
+Remove-Item -Recurse -Force .venv_mlp
 
-pip freeze > requirements-MLP.txt
+pip freeze > requirements-New.txt
 
-python -m venv .venv_cnn
-.venv_cnn\Scripts\activate
+python -m venv .venv_mlp
+.venv_mlp\Scripts\activate
 pip install --upgrade pip
-pip install -r requirements-CNN.txt
+pip install -r requirements-MLP.txt
 pip install tensorflow==2.11.0 protobuf<3.20 opencv-python numpy scikit-learn matplotlib tqdm mediapipe
 deactivate
