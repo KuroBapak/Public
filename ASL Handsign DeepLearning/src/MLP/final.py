@@ -7,7 +7,7 @@ import time
 from pathlib import Path
 
 st.set_page_config(page_title="ASL Image Recognition", layout="centered")
-st.title("ASL Image Recognition - Model Launcher")
+st.title("ASL MLP Image Recognition - Model Launcher")
 
 HERE = Path(__file__).resolve().parent
 
@@ -89,7 +89,7 @@ def start_selected():
     st.session_state.thread = thread
     thread.start()
     time.sleep(0.2)
-    st.success(f"Menjalankan `{target.name}` with cwd=`{project_root}`. Log: `{project_root / f'launcher_{target.stem}.log'}`")
+    st.success(f"Running `{target.name}` with cwd=`{project_root}`. Log: `{project_root / f'launcher_{target.stem}.log'}`")
 
 def stop_process():
     proc = st.session_state.proc
