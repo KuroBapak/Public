@@ -1,4 +1,4 @@
-# src/collect_videos.py
+# src/collect_videos.py (run)python src\collect_videos.py --class A --n 40 --sec 1.5
 import cv2, os, time, argparse
 
 def record_clips_for_class(out_dir, class_name, n_clips=50, clip_seconds=1.5, fps=15):
