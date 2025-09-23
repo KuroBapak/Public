@@ -1,13 +1,4 @@
 # src/realtime_sentence_multi.py
-# Full working file (minimal edits only):
-#  - fixed Arduino handling (safe import/open)
-#  - removed invalid `global` usage
-#  - reset Left-hand state & stop Arduino when Left not detected (Right logic unchanged)
-#
-# IMPORTANT: Adjust ARDUINO_PORT if needed (e.g. 'COM3' or '/dev/ttyUSB0').
-# The Arduino protocol in this script sends single bytes: b'L', b'R', b'U', b'D', b'S' (stop).
-# Make sure your Arduino firmware expects these commands (S = stop).
-#
 import os, json, time
 import cv2
 import numpy as np
@@ -19,29 +10,6 @@ import mediapipe as mp
 ASL_MODEL = "outputs/models/landmark_mlp_best.h5"
 ARROW_MODEL = "outputs/models/landmark_arrow_best.h5"
 FEATURE_DIR = "outputs/features"
-
-# Arduino config (change port/name if needed)
-ARDUINO_PORT = "COM3"   # <-- change to your port, or set to None to disable
-ARDUINO_BAUD = 9600
-
-# Try to import and open serial (pyserial). If not available or fails, continue without Arduino.
-arduino = None
-if ARDUINO_PORT:
-    try:
-        import serial
-        try:
-            arduino = serial.Serial(ARDUINO_PORT, ARDUINO_BAUD, timeout=1)
-            print(f"[INFO] Arduino serial opened on {ARDUINO_PORT} @ {ARDUINO_BAUD}")
-        except Exception as e:
-            print(f"[WARN] Could not open serial port {ARDUINO_PORT}: {e}. Continuing without Arduino.")
-            arduino = None
-    except Exception as e:
-        print(f"[WARN] pyserial not available or failed to import: {e}. Continuing without Arduino.")
-        arduino = None
-else:
-    print("[INFO] ARDUINO_PORT not set — running without Arduino.")
-
-last_sent = None   # keep last left-hand command sent to avoid spamming Arduino
 
 # ASL
 ASL_CLASSES_JSON = os.path.join(FEATURE_DIR, "classes_filtered.json")
@@ -65,7 +33,7 @@ SMOOTH_WINDOW = 8
 STABILITY_COUNT = 12
 CONF_THRESH = 0.55
 SHOW_THUMBNAIL = True
-txt_color1 = (0,255,255)
+txt_color1 = (0,255,255) 
 
 # MediaPipe
 mp_hands = mp.solutions.hands
@@ -95,11 +63,11 @@ def draw_ui(frame, bbox, hand_found, candidate_label, candidate_conf, consec, se
 
     # ==== Candidate Right Hand ====
     if candidate_conf["Right"] < 0.5:
-        txt_color_r = (0,0,255)
+        txt_color_r = (0,0,255)     # merah
     elif candidate_conf["Right"] < 0.75:
-        txt_color_r = (0,255,255)
+        txt_color_r = (0,255,255)   # kuning
     else:
-        txt_color_r = (0,255,0)
+        txt_color_r = (0,255,0)     # hijau
 
     txt = f"Candidate: {candidate_label['Right']}  {candidate_conf['Right']*100:4.1f}%"
     cv2.putText(frame, txt, (10,30), cv2.FONT_HERSHEY_SIMPLEX, 0.9, txt_color_r, 2)
@@ -153,21 +121,17 @@ try:
     while True:
         ret, frame = cap.read()
         if not ret: break
-        frame = cv2.flip(frame, 1)
+        frame = cv2.flip(frame, 1)  # horizontal mirror
         img_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         res = hands.process(img_rgb)
 
         hand_found = False
         bbox = center_crop_bbox(frame)
 
-        # Keep track which hands are present this frame:
-        seen_hands = set()
-
         if res.multi_hand_landmarks and res.multi_handedness:
             for hm, handedness in zip(res.multi_hand_landmarks, res.multi_handedness):
                 hand_found = True
                 label = handedness.classification[0].label  # "Left"/"Right"
-                seen_hands.add(label)
                 mp_draw.draw_landmarks(frame, hm, mp_hands.HAND_CONNECTIONS)
                 vec = landmarks_to_vector(hm)
 
@@ -195,50 +159,7 @@ try:
                 else:
                     candidate_label[label], candidate_conf[label], consec[label] = "...", 0.0, 0
 
-        # If Left hand not seen this frame -> reset Left state and stop Arduino (but leave Right untouched)
-        if "Left" not in seen_hands:
-            # clear left buffer & reset its state so UI resets
-            buf["Left"].clear()
-            last_pred["Left"] = None
-            consec["Left"] = 0
-            candidate_label["Left"] = "..."
-            candidate_conf["Left"] = 0.0
-            # send stop command to Arduino once if we previously sent something
-            if arduino is not None and last_sent is not None:
-                try:
-                    arduino.write(b"S")   # 'S' = stop (you must handle this on Arduino)
-                    print("Sent to Arduino: stop (no left hand detected)")
-                except Exception as e:
-                    print("Arduino write failed (stop):", e)
-                last_sent = None
-
-        # === SEND LEFT HAND COMMAND TO ARDUINO ===
-        # Only when Left is stable+confident; avoid spamming by comparing last_sent.
-        if candidate_conf["Left"] > 0.65 and consec["Left"] >= STABILITY_COUNT:
-            cmd = candidate_label["Left"].lower()
-            if cmd != last_sent:
-                if arduino is not None:
-                    try:
-                        if cmd == "left":
-                            arduino.write(b"L")
-                        elif cmd == "right":
-                            arduino.write(b"R")
-                        elif cmd == "up":
-                            arduino.write(b"U")
-                        elif cmd == "down":
-                            arduino.write(b"D")
-                        else:
-                            # unknown label -> optionally no-op
-                            pass
-                        print("Sent to Arduino:", cmd)
-                    except Exception as e:
-                        print("Arduino write failed:", e)
-                else:
-                    # running without Arduino; just print for debug
-                    print("Arduino disabled - would send:", cmd)
-                last_sent = cmd
-
-        # auto-accept for Right hand only (unchanged logic)
+        # auto-accept for Right hand only
         if auto_accept and consec["Right"] >= STABILITY_COUNT and candidate_conf["Right"] >= CONF_THRESH:
             ch = candidate_label["Right"]
             lower = ch.lower()
@@ -294,14 +215,3 @@ try:
 
 finally:
     cap.release(); cv2.destroyAllWindows(); hands.close()
-    if arduino is not None:
-        try:
-            if arduino.is_open:
-                # send stop before closing (optional)
-                try:
-                    arduino.write(b"S")
-                except Exception:
-                    pass
-                arduino.close()
-        except Exception:
-            pass
