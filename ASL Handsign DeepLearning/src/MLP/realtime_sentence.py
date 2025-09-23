@@ -77,9 +77,9 @@ def draw_ui(frame, bbox, hand_found, candidate_label, candidate_conf, consec, se
 
     # confidence bar
     bar_x, bar_y, bar_w, bar_h = 10, 55, 220, 18
-    cv2.rectangle(frame, (bar_x,bar_y), (bar_x+bar_w, bar_y+bar_h), (50,50,50), 1)
+    cv2.rectangle(frame, (bar_x,bar_y), (bar_x+bar_w, bar_y+bar_h), txt_color, 1)
     fill = int(bar_w * min(1.0, candidate_conf))
-    cv2.rectangle(frame, (bar_x,bar_y), (bar_x+fill, bar_y+bar_h), txt_color1, -1)
+    cv2.rectangle(frame, (bar_x,bar_y), (bar_x+fill, bar_y+bar_h), txt_color, -1)
     cv2.putText(frame, f"Stable: {consec}/{STABILITY_COUNT}", (bar_x, bar_y+bar_h+20),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.45, txt_color1, 1)
 
