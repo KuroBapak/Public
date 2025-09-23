@@ -7,7 +7,7 @@ import time
 from pathlib import Path
 
 st.set_page_config(page_title="ASL Image Recognition", layout="centered")
-st.title("ASL MLP Image Recognition - Model Launcher")
+st.title("ASL MLP Image Recognition")
 
 HERE = Path(__file__).resolve().parent
 
@@ -47,7 +47,6 @@ def find_project_root(script_path: Path):
 mode = st.radio("Choose mode", ("Multihand (Right=alphabet & Left=arrow)", "Single hand (alphabet only)"))
 
 start_btn = st.button("▶️ Start")
-stop_btn  = st.button("⏹ Stop")
 
 if "proc" not in st.session_state: st.session_state.proc = None
 if "thread" not in st.session_state: st.session_state.thread = None
@@ -91,32 +90,8 @@ def start_selected():
     time.sleep(0.2)
     st.success(f"Running `{target.name}` with cwd=`{project_root}`. Log: `{project_root / f'launcher_{target.stem}.log'}`")
 
-def stop_process():
-    proc = st.session_state.proc
-    if proc is None:
-        st.info("No running process.")
-        return
-    try:
-        proc.terminate()
-        time.sleep(1.0)
-        if proc.poll() is None:
-            proc.kill()
-        st.session_state.proc = None
-        st.success("Process stopped.")
-    except Exception as e:
-        st.error(f"Failed to stop process: {e}")
-
 if start_btn:
     start_selected()
-if stop_btn:
-    stop_process()
-
-st.markdown("## Status")
-proc = st.session_state.proc
-if proc is None:
-    st.info("No running process.")
-else:
-    st.write(f"PID={proc.pid} running={proc.poll() is None}")
 
 if st.session_state.logfile and st.session_state.logfile.exists():
     st.markdown("### Log snapshot (tail 2000 chars)")

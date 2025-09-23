@@ -1,4 +1,3 @@
-# src/realtime_sentence.py
 import os, json, time
 import cv2
 import numpy as np
@@ -14,14 +13,14 @@ SCALER_MEAN = os.path.join(FEATURE_DIR, "scaler_mean.npy")
 SCALER_SCALE = os.path.join(FEATURE_DIR, "scaler_scale.npy")
 
 SMOOTH_WINDOW = 8
-STABILITY_COUNT = 10
+STABILITY_COUNT = 12
 CONF_THRESH = 0.55
-SHOW_THUMBNAIL = True  # show little window of detected hand (not needed but helpful)
+SHOW_THUMBNAIL = True
+txt_color1 = (0,255,255)  
 # =======================
 
 # load classes
 if not os.path.exists(CLASSES_JSON):
-    # fallback to classes.json
     CLASSES_JSON = os.path.join(FEATURE_DIR, "classes.json")
 with open(CLASSES_JSON, "r") as f:
     classes = json.load(f)
@@ -46,46 +45,59 @@ last_pred = None
 consec = 0
 candidate_label = "..."
 candidate_conf = 0.0
-sentence = ""            # composed sentence string
-auto_accept = False      # toggle for auto-append when stable+confident
+sentence = ""
+auto_accept = False
 save_idx = 0
 
-# helper to convert landmarks to vector (63 dims)
+# helper convert landmarks to vector (63 dims)
 def landmarks_to_vector(landmarks):
     vec = []
     for lm in landmarks.landmark:
         vec.extend([lm.x, lm.y, lm.z])
     return np.array(vec, dtype=np.float32)
 
-# helpers for UI
+# UI drawing
 def draw_ui(frame, bbox, hand_found, candidate_label, candidate_conf, consec, sentence, auto_accept):
     h, w = frame.shape[:2]
     x1,y1,x2,y2 = bbox
     color = (0,200,0) if hand_found else (255,150,0)
     cv2.rectangle(frame, (x1,y1), (x2,y2), color, 2)
 
+    # pilih warna dinamis untuk teks berdasarkan confidence
+    if candidate_conf < 0.5:
+        txt_color = (0,0,255)   # merah
+    elif candidate_conf < 0.75:
+        txt_color = (0,255,255) # kuning
+    else:
+        txt_color = (0,255,0)   # hijau
+
     # candidate text
     txt = f"Candidate: {candidate_label}  {candidate_conf*100:4.1f}%"
-    cv2.putText(frame, txt, (10,30), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0,255,0), 2)
+    cv2.putText(frame, txt, (10,30), cv2.FONT_HERSHEY_SIMPLEX, 0.9, txt_color, 2)
 
     # confidence bar
     bar_x, bar_y, bar_w, bar_h = 10, 55, 220, 18
     cv2.rectangle(frame, (bar_x,bar_y), (bar_x+bar_w, bar_y+bar_h), (50,50,50), 1)
     fill = int(bar_w * min(1.0, candidate_conf))
-    cv2.rectangle(frame, (bar_x,bar_y), (bar_x+fill, bar_y+bar_h), (0,200,0), -1)
-    cv2.putText(frame, f"Stable: {consec}/{STABILITY_COUNT}", (bar_x, bar_y+bar_h+20), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (200,200,0), 1)
+    cv2.rectangle(frame, (bar_x,bar_y), (bar_x+fill, bar_y+bar_h), txt_color1, -1)
+    cv2.putText(frame, f"Stable: {consec}/{STABILITY_COUNT}", (bar_x, bar_y+bar_h+20),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.45, txt_color1, 1)
 
-    # sentence (wrap if long)
+    # sentence
     max_chars = 40
-    display = sentence[-(max_chars*2):]  # show recent history
-    cv2.putText(frame, f"Sentence: {display}", (10, h-30), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (220,220,255), 2)
+    display = sentence[-(max_chars*2):]
+    cv2.putText(frame, f"Sentence: {display}", (10, h-30),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.8, txt_color1, 2)
 
     # mode text
     mode_text = "AUTO-ACCEPT ON" if auto_accept else "Manual accept (press 's')"
-    cv2.putText(frame, mode_text, (10, h-60), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (180,180,180), 1)
+    cv2.putText(frame, mode_text, (10, h-60),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.6, txt_color1, 1)
 
     # key help
-    cv2.putText(frame, "Keys: s=accept b=backspace SPACE=space c=clear f=toggle auto w=write q=quit", (10, h-10), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (150,150,150), 1)
+    cv2.putText(frame,
+                "Keys: s=accept b=backspace SPACE=space c=clear f=auto w=write q=quit",
+                (10, h-10), cv2.FONT_HERSHEY_SIMPLEX, 0.45, txt_color1, 1)
 
 # center-crop fallback bbox
 def center_crop_bbox(frame):
@@ -105,7 +117,7 @@ try:
         ret, frame = cap.read()
         if not ret:
             break
-        frame = cv2.flip(frame, 1)  # horizontal mirror
+        frame = cv2.flip(frame, 1)
         img_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         res = hands.process(img_rgb)
 
@@ -116,26 +128,24 @@ try:
             hm = res.multi_hand_landmarks[0]
             mp_draw.draw_landmarks(frame, hm, mp_hands.HAND_CONNECTIONS)
             vec = landmarks_to_vector(hm)
-            # standardize
             vec_s = (vec - mean) / (scale + 1e-12)
             probs = model.predict(np.expand_dims(vec_s, axis=0), verbose=0)[0]
             buf.append(probs)
-            # for thumbnail crop: compute bounding box from landmarks
+
+            # bbox from landmarks
             h_img, w_img = frame.shape[:2]
             xs = [lm.x for lm in hm.landmark]; ys = [lm.y for lm in hm.landmark]
             xmin = int(max(0, min(xs) * w_img) - 20); ymin = int(max(0, min(ys) * h_img) - 20)
             xmax = int(min(w_img, max(xs) * w_img) + 20); ymax = int(min(h_img, max(ys) * h_img) + 20)
             bbox = (xmin,ymin,xmax,ymax)
         else:
-            # no hand: slightly decay last probs so buffer doesn't freeze
             if len(buf) > 0:
                 buf.append(buf[-1] * 0.6)
 
-        # compute averaged probs and candidate
+        # compute averaged probs
         if len(buf) > 0:
             avg = np.mean(np.array(buf), axis=0)
             cls = int(np.argmax(avg)); conf = float(avg[cls])
-            # stability tracking
             if last_pred is None or cls != last_pred:
                 last_pred = cls; consec = 1
             else:
@@ -147,20 +157,16 @@ try:
             candidate_conf = 0.0
             consec = 0
 
-        # auto-accept logic
+        # auto-accept
         if auto_accept and consec >= STABILITY_COUNT and candidate_conf >= CONF_THRESH:
-            # append automatically and clear buffer to avoid duplicates
             ch = candidate_label
-            # handle "space" or "nothing" special labels if they exist
             lower = ch.lower()
             if lower in ("space", "blank", "nothing"):
                 sentence += " "
-            elif lower == "del":  # treat 'del' as backspace
+            elif lower == "del":
                 sentence = sentence[:-1]
             else:
-                # assume single letter label (A,B,...). If label length >1, append its first char
                 sentence += ch[0] if len(ch) > 0 else ""
-            # reset buffer & counters
             buf.clear()
             last_pred = None
             consec = 0
@@ -168,10 +174,9 @@ try:
         # draw UI
         draw_ui(frame, bbox, hand_found, candidate_label, candidate_conf, consec, sentence, auto_accept)
 
-        # draw thumbnail (optional)
+        # thumbnail
         if SHOW_THUMBNAIL:
             x1,y1,x2,y2 = bbox
-            # clamp
             x1,y1 = max(0,x1), max(0,y1)
             x2,y2 = min(frame.shape[1],x2), min(frame.shape[0],y2)
             try:
@@ -181,43 +186,40 @@ try:
             except Exception:
                 pass
 
-        cv2.imshow("ASL Sentence Builder", frame)
+        cv2.imshow("ASL Image Recognition", frame)
         key = cv2.waitKey(1) & 0xFF
 
         # key handling
         if key == ord('q'):
             break
         elif key == ord('s'):
-            # accept candidate manually
             ch = candidate_label
             lower = ch.lower()
             if lower in ("space", "blank", "nothing"):
                 sentence += " "
-            elif lower == "del":  # treat 'del' as backspace
+            elif lower == "del":
                 sentence = sentence[:-1]
             else:
                 sentence += ch[0] if len(ch) > 0 else ""
-            # clear buffer to avoid immediate repeated acceptance
             buf.clear()
             last_pred = None
             consec = 0
-        elif key == ord('b'):  # backspace
+        elif key == ord('b'):
             sentence = sentence[:-1]
-        elif key == ord('c'):  # clear
+        elif key == ord('c'):
             sentence = ""
-        elif key == ord('f'):  # toggle auto-accept
+        elif key == ord('f'):
             auto_accept = not auto_accept
-        elif key == ord('w'):  # write to file
+        elif key == ord('w'):
             fname = f"outputs/sentences_{int(time.time())}.txt"
             os.makedirs("outputs", exist_ok=True)
             with open(fname, "w", encoding="utf-8") as fw:
                 fw.write(sentence)
             print("Saved sentence to", fname)
-        elif key == 32:  # spacebar
+        elif key == 32:
             sentence += " "
-        elif key == ord('p'):  # print to console
+        elif key == ord('p'):
             print("Sentence:", sentence)
-        # you can add more keys as needed
 
 finally:
     cap.release()

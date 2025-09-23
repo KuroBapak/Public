@@ -30,9 +30,10 @@ arrow_model = tf.keras.models.load_model(ARROW_MODEL, compile=False)
 
 # Params
 SMOOTH_WINDOW = 8
-STABILITY_COUNT = 10
+STABILITY_COUNT = 12
 CONF_THRESH = 0.55
 SHOW_THUMBNAIL = True
+txt_color1 = (0,255,255) 
 
 # MediaPipe
 mp_hands = mp.solutions.hands
@@ -60,35 +61,49 @@ def draw_ui(frame, bbox, hand_found, candidate_label, candidate_conf, consec, se
     color = (0,200,0) if hand_found else (255,150,0)
     cv2.rectangle(frame, (x1,y1), (x2,y2), color, 2)
 
-    # candidate text (always Right hand for sentence)
+    # ==== Candidate Right Hand ====
+    if candidate_conf["Right"] < 0.5:
+        txt_color_r = (0,0,255)     # merah
+    elif candidate_conf["Right"] < 0.75:
+        txt_color_r = (0,255,255)   # kuning
+    else:
+        txt_color_r = (0,255,0)     # hijau
+
     txt = f"Candidate: {candidate_label['Right']}  {candidate_conf['Right']*100:4.1f}%"
-    cv2.putText(frame, txt, (10,30), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0,255,0), 2)
+    cv2.putText(frame, txt, (10,30), cv2.FONT_HERSHEY_SIMPLEX, 0.9, txt_color_r, 2)
 
     # confidence bar
     bar_x, bar_y, bar_w, bar_h = 10, 55, 220, 18
     cv2.rectangle(frame, (bar_x,bar_y), (bar_x+bar_w, bar_y+bar_h), (50,50,50), 1)
     fill = int(bar_w * min(1.0, candidate_conf['Right']))
-    cv2.rectangle(frame, (bar_x,bar_y), (bar_x+fill, bar_y+bar_h), (0,200,0), -1)
+    cv2.rectangle(frame, (bar_x,bar_y), (bar_x+fill, bar_y+bar_h), txt_color_r, -1)
     cv2.putText(frame, f"Stable: {consec['Right']}/{STABILITY_COUNT}", (bar_x, bar_y+bar_h+20),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.45, (200,200,0), 1)
+                cv2.FONT_HERSHEY_SIMPLEX, 0.45, txt_color_r, 1)
 
-    # Left hand arrow label (shown separately)
+    # ==== Left Hand (Arrow) ====
+    if candidate_conf["Left"] < 0.5:
+        txt_color_l = (0,0,255)
+    elif candidate_conf["Left"] < 0.75:
+        txt_color_l = (0,255,255)
+    else:
+        txt_color_l = (0,255,0)
+
     cv2.putText(frame, f"Left hand: {candidate_label['Left']} {candidate_conf['Left']*100:.1f}%",
-                (10,120), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255,200,0), 2)
+                (10,120), cv2.FONT_HERSHEY_SIMPLEX, 0.8, txt_color_l, 2)
 
     # sentence
     max_chars = 40
     display = sentence[-(max_chars*2):]
     cv2.putText(frame, f"Sentence: {display}", (10, h-30),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.8, (220,220,255), 2)
+                cv2.FONT_HERSHEY_SIMPLEX, 0.8, txt_color1, 2)
 
     # mode
     mode_text = "AUTO-ACCEPT ON" if auto_accept else "Manual accept (press 's')"
-    cv2.putText(frame, mode_text, (10, h-60), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (180,180,180), 1)
+    cv2.putText(frame, mode_text, (10, h-60), cv2.FONT_HERSHEY_SIMPLEX, 0.6, txt_color1, 1)
 
     # key help
-    cv2.putText(frame, "Keys: s=accept b=backspace SPACE=space c=clear f=toggle auto w=write q=quit",
-                (10, h-10), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (150,150,150), 1)
+    cv2.putText(frame, "Keys: s=accept b=backspace SPACE=space c=clear f=auto w=write q=quit",
+                (10, h-10), cv2.FONT_HERSHEY_SIMPLEX, 0.45, txt_color1, 1)
 
 def center_crop_bbox(frame):
     h,w = frame.shape[:2]
@@ -172,7 +187,7 @@ try:
                 cv2.rectangle(frame, (frame.shape[1]-130,10), (frame.shape[1]-10,130), (200,200,200), 1)
             except: pass
 
-        cv2.imshow("ASL Sentence Builder (multi-hand)", frame)
+        cv2.imshow("ASL Image Recognition(multi-hand)", frame)
         key = cv2.waitKey(1) & 0xFF
 
         # key handling (same as original)
